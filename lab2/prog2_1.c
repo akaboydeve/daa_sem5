@@ -62,7 +62,7 @@ int main()
     double cpu_time_used;
     start = clock();
     int *arr;
-    int size, n = 1;
+    int size, n = 0;
     readFile(&arr, &size);
     FILE *fp;
     fp = fopen("progO2_1.txt", "w");
