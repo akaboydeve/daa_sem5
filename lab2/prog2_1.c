@@ -46,13 +46,13 @@ void printArray(int *arr, int size)
     }
 }
 
-int recurssiveGCD(int a, int b)
+int recurssiveGCD(int n1, int n2)
 {
-    if (b == 0)
+    if (n2 == 0)
     {
-        return a;
+        return n1;
     }
-    return recurssiveGCD(b, a % b);
+    return recurssiveGCD(n2, n1 % n2);
 }
 
 int main()
