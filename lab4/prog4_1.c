@@ -124,7 +124,6 @@ int main()
             printArray(arr, n);
             printf("\nNumber of comparisons: %d\n", comp);
             printf("Time taken in ns: %f\n", (end - start) * 1000000 / CLOCKS_PER_SEC);
-            break;
         case 2:
             comp = 0;
             readFile("inDesc.dat", arr, &n);
