@@ -1,82 +1,48 @@
-/*Wap to search an element in an array using binary search technique*/
+// search an element in an array using binary search technique and find out all different types of complexity
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 
-void readFile(char *filename, int *arr, int n)
+int binarySearch(int arr[], int n, int target)
 {
-    FILE *file = fopen(filename, "r");
-    if (file == NULL)
-    {
-        printf("File not found\n");
-        exit(1);
-    }
-    for (int i = 0; i < n; i++)
-    {
-        fscanf(file, "%d", &arr[i]);
-    }
-    fclose(file);
-}
+    int low = 0;
+    int high = n - 1;
 
-void writeFile(char *filename, int *arr, int n)
-{
-    FILE *file = fopen(filename, "w");
-    for (int i = 0; i < n; i++)
+    while (low <= high)
     {
-        fprintf(file, "%d ", arr[i]);
-    }
-    fclose(file);
-}
+        int mid = low + (high - low) / 2;
 
-int binarySearch(int *arr, int low, int high, int key)
-{
-    if (low > high)
-    {
-        return -1;
+        if (arr[mid] == target)
+        {
+            return mid; // Element found
+        }
+
+        if (arr[mid] < target)
+        {
+            low = mid + 1; // Search right half
+        }
+        else
+        {
+            high = mid - 1; // Searc left half
+        }
     }
 
-    int mid = (low + high) / 2;
-
-    if (arr[mid] == key)
-    {
-        return mid;
-    }
-    else if (arr[mid] < key)
-    {
-        return binarySearch(arr, mid + 1, high, key);
-    }
-    else
-    {
-        return binarySearch(arr, low, mid - 1, key);
-    }
+    return -1; // Element not found
 }
 
 int main()
 {
-    int n;
-    printf("Enter the number of elements: ");
-    scanf("%d", &n);
+    int arr[] = {2, 4, 6, 8, 10, 12, 14};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    int target = 4;
 
-    int arr[n];
-    readFile("prog5_2.txt", arr, n);
+    int result = binarySearch(arr, n, target);
 
-    int key;
-    printf("Enter the element to search: ");
-    scanf("%d", &key);
-
-    long start = clock();
-    int index = binarySearch(arr, 0, n - 1, key);
-    long end = clock();
-
-    printf("Time taken: %lf\n", (double)(end - start) / CLOCKS_PER_SEC);
-
-    if (index == -1)
+    if (result != -1)
     {
-        printf("Element not found\n");
+        printf("Element found at index %d\n", result);
     }
     else
     {
-        printf("Element found at index %d\n", index);
+        printf("Element not found\n");
     }
 
     return 0;
