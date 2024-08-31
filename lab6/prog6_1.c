@@ -1,105 +1,209 @@
-#include <stdio.h>
-
-struct ITEM
+/*Define a struct person as follows:
+struct person
 {
-    int item_id;
-    double item_profit;
-    double item_weight;
-    double profit_weight_ratio;
+    int id;
+    char *name;
+    int age;
+    int height;
+    int weight;
+};
+Write a menu driven program to read the data of ‘n’ students from a file and store them in a dynamically allocated array of struct person.
+Implement the min-heap or max-heap and its operations based on the menu options.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct person
+{
+    int id;
+    char *name;
+    int age;
+    int height;
+    int weight;
 };
 
-void swap(struct ITEM *a, struct ITEM *b)
+void swap(struct person *a, struct person *b)
 {
-    struct ITEM temp = *a;
+    struct person temp = *a;
     *a = *b;
     *b = temp;
 }
 
-void heapify(struct ITEM arr[], int n, int i)
+void minHeapify(struct person heap[], int n, int i)
+{
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n && heap[left].age < heap[smallest].age)
+    {
+        smallest = left;
+    }
+    if (right < n && heap[right].age < heap[smallest].age)
+    {
+        smallest = right;
+    }
+    if (smallest != i)
+    {
+        swap(&heap[i], &heap[smallest]);
+        minHeapify(heap, n, smallest);
+    }
+}
+
+void maxHeapify(struct person heap[], int n, int i)
 {
     int largest = i;
     int left = 2 * i + 1;
     int right = 2 * i + 2;
 
-    if (left < n && arr[left].profit_weight_ratio > arr[largest].profit_weight_ratio)
+    if (left < n && heap[left].weight > heap[largest].weight)
+    {
         largest = left;
-
-    if (right < n && arr[right].profit_weight_ratio > arr[largest].profit_weight_ratio)
+    }
+    if (right < n && heap[right].weight > heap[largest].weight)
+    {
         largest = right;
-
+    }
     if (largest != i)
     {
-        swap(&arr[i], &arr[largest]);
-        heapify(arr, n, largest);
+        swap(&heap[i], &heap[largest]);
+        maxHeapify(heap, n, largest);
     }
 }
 
-void heapSort(struct ITEM arr[], int n)
+void createMinHeap(struct person heap[], int n)
 {
-
     for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(arr, n, i);
-
-    for (int i = n - 1; i >= 0; i--)
     {
-        swap(&arr[0], &arr[i]);
-        heapify(arr, i, 0);
+        minHeapify(heap, n, i);
     }
 }
 
-double fractionalKnapsack(struct ITEM items[], int n, double knapsack_capacity)
+void createMaxHeap(struct person heap[], int n)
 {
-    heapSort(items, n);
-
-    double max_profit = 0.0;
-
-    for (int i = n - 1; i >= 0; i--)
+    for (int i = n / 2 - 1; i >= 0; i--)
     {
-        if (knapsack_capacity == 0)
-            break;
+        maxHeapify(heap, n, i);
+    }
+}
 
-        if (items[i].item_weight <= knapsack_capacity)
-        {
-            knapsack_capacity -= items[i].item_weight;
-            max_profit += items[i].item_profit;
-            printf("Item No %d %.6f %.6f %.6f\n", items[i].item_id, items[i].item_profit, items[i].item_weight, 1.0);
-        }
-        else
-        {
-            double fraction = knapsack_capacity / items[i].item_weight;
-            max_profit += items[i].item_profit * fraction;
-            printf("Item No %d %.6f %.6f %.6f\n", items[i].item_id, items[i].item_profit, items[i].item_weight, fraction);
-            knapsack_capacity = 0;
-        }
+void insertPerson(struct person heap[], int *n, struct person newPerson)
+{
+    heap[*n] = newPerson;
+    int i = (*n)++;
+    while (i != 0 && heap[(i - 1) / 2].age > heap[i].age)
+    {
+        swap(&heap[i], &heap[(i - 1) / 2]);
+        i = (i - 1) / 2;
+    }
+}
+
+void deleteOldestPerson(struct person heap[], int *n)
+{
+    if (*n <= 0)
+    {
+        printf("Heap is empty.\n");
+        return;
+    }
+    heap[0] = heap[--(*n)];
+    minHeapify(heap, *n, 0);
+}
+
+void displayWeightOfYoungestPerson(struct person heap[])
+{
+    printf("Weight of youngest student: %.2f kg\n", heap[0].weight * 0.453592);
+}
+
+void readData(struct person **persons, int *n)
+{
+    FILE *file = fopen("students.txt", "r");
+    if (!file)
+    {
+        printf("File not found.\n");
+        exit(1);
     }
 
-    return max_profit;
+    fscanf(file, "%d", n);
+    *persons = (struct person *)malloc(*n * sizeof(struct person));
+    for (int i = 0; i < *n; i++)
+    {
+        (*persons)[i].name = (char *)malloc(50 * sizeof(char));
+        fscanf(file, "%d %s %d %d %d", &(*persons)[i].id, (*persons)[i].name, &(*persons)[i].age, &(*persons)[i].height, &(*persons)[i].weight);
+    }
+
+    fclose(file);
+}
+
+void displayData(struct person persons[], int n)
+{
+    printf("Id Name Age Height Weight(pound)\n");
+    for (int i = 0; i < n; i++)
+    {
+        printf("%d %s %d %d %d\n", persons[i].id, persons[i].name, persons[i].age, persons[i].height, persons[i].weight);
+    }
 }
 
 int main()
 {
-    int n;
-    double capacity;
+    struct person *persons = NULL;
+    int n = 0;
+    int option;
 
-    printf("Enter the number of items: ");
-    scanf("%d", &n);
-
-    struct ITEM items[n];
-
-    for (int i = 0; i < n; i++)
+    while (1)
     {
-        items[i].item_id = i + 1;
-        printf("Enter the profit and weight of item no %d: ", i + 1);
-        scanf("%lf %lf", &items[i].item_profit, &items[i].item_weight);
-        items[i].profit_weight_ratio = items[i].item_profit / items[i].item_weight;
+        printf("\nMAIN MENU (HEAP)\n");
+        printf("1. Read Data\n");
+        printf("2. Create a Min-heap based on the age\n");
+        printf("3. Create a Max-heap based on the weight\n");
+        printf("4. Display weight of the youngest person\n");
+        printf("5. Insert a new person into the Min-heap\n");
+        printf("6. Delete the oldest person\n");
+        printf("7. Exit\n");
+        printf("Enter option: ");
+        scanf("%d", &option);
+
+        switch (option)
+        {
+        case 1:
+            readData(&persons, &n);
+            displayData(persons, n);
+            break;
+        case 2:
+            createMinHeap(persons, n);
+            printf("Min-heap created based on age.\n");
+
+            break;
+        case 3:
+            createMaxHeap(persons, n);
+            printf("Max-heap created based on weight.\n");
+            break;
+        case 4:
+            displayWeightOfYoungestPerson(persons);
+            break;
+        case 5:
+        {
+            struct person newPerson;
+            newPerson.name = (char *)malloc(50 * sizeof(char));
+            printf("Enter new person's data (id name age height weight): ");
+            scanf("%d %s %d %d %d", &newPerson.id, newPerson.name, &newPerson.age, &newPerson.height, &newPerson.weight);
+            insertPerson(persons, &n, newPerson);
+            printf("Person inserted into the Min-heap.\n");
+            break;
+        }
+        case 6:
+            deleteOldestPerson(persons, &n);
+            printf("Oldest person deleted from the Min-heap.\n");
+            break;
+        case 7:
+            free(persons);
+            printf("Exiting program.\n");
+            exit(0);
+        default:
+            printf("Invalid option. Try again.\n");
+        }
     }
-
-    printf("Enter the capacity of knapsack: ");
-    scanf("%lf", &capacity);
-
-    double max_profit = fractionalKnapsack(items, n, capacity);
-
-    printf("Maximum profit: %.6f\n", max_profit);
 
     return 0;
 }
